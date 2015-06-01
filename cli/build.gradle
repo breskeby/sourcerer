@@ -1,7 +1,37 @@
 apply plugin:'groovy'
 
+sourceSets {
+    integTest {
+        compileClasspath += main.output + test.output
+        runtimeClasspath += main.output + test.output
+    }
+}
+
+configurations {
+    integTestCompile.extendsFrom testCompile
+    integTestRuntime.extendsFrom testRuntime
+}
+
 dependencies {
     compile project(":model")
     compile project(":parser")
     compile project(":export")
+
+    testCompile 'org.spockframework:spock-core:1.0-groovy-2.3'
+}
+
+task integTest(type: Test) {
+    classpath = sourceSets.integTest.runtimeClasspath
+    testClassesDir = sourceSets.integTest.output.classesDir
+}
+
+plugins.withType(org.gradle.plugins.ide.idea.IdeaPlugin) { // lazy as plugin not applied yet
+    idea {
+        module {
+            testSourceDirs += sourceSets.integTest.groovy.srcDirs
+            testSourceDirs += sourceSets.integTest.resources.srcDirs
+            scopes.TEST.plus.add(configurations.integTestCompile)
+            scopes.TEST.plus.add(configurations.integTestRuntime)
+        }
+    }
 }

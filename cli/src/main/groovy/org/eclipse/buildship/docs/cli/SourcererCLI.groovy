@@ -6,13 +6,18 @@ import org.eclipse.buildship.docs.model.ClassMetaDataRepository
 
 class SourcererCLI {
     public static void main(String[] args) {
-        File sourceFolder = new File("/Users/Rene/Downloads/gradle-2.4/src")
+        if(args.size() != 2) {
+            println "wrong number of arguments"
+            println "1st argument must be path to source folder"
+            println "2nd argument target dir for json task glossary"
+        }
+        File sourceFolder = new File(args[0])
 
         JvmSourceParser parser = new JvmSourceParser();
         ClassMetaDataRepository metaDataRepository = parser.parseSourceFolder(sourceFolder)
         def tasks = parser.filterTasks(metaDataRepository)
 
-        File outputDir = new File("glossary/gradle-2.4-glossary")
+        File outputDir = new File(args[1])
         outputDir.delete()
         outputDir.mkdirs()
         new TaskExporter(metaDataRepository).export(outputDir, tasks)
