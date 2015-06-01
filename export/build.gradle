@@ -1,0 +1,15 @@
+apply plugin:'groovy'
+
+
+repositories {
+    maven {
+        url = "http://docbook4j.googlecode.com/svn/m2-repo/releases"
+    }
+}
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    compile project(':model')
+    compile 'org.codehaus.groovy:groovy-all:2.3.10'
+    compile 'com.google.code.gson:gson:2.3.1'
+    compile "net.javaforge.docbook4j:docbook4j:1.0.1"
+}

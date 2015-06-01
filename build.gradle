@@ -1,0 +1,18 @@
+allprojects {
+	apply plugin:'idea'
+}
+
+subprojects {
+    apply plugin:'groovy'
+
+    repositories {
+        maven {
+            url 'https://repo.gradle.org/gradle/libs-releases-local'
+        }
+        jcenter()
+    }
+
+    dependencies {
+        compile 'org.codehaus.groovy:groovy-all:2.3.10'
+    }
+}

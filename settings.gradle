@@ -1,0 +1,6 @@
+include 'parser'
+include 'model'
+include 'export'
+include 'cli'
+
+rootProject.name = 'sourcerer'

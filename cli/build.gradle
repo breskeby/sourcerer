@@ -1,0 +1,7 @@
+apply plugin:'groovy'
+
+dependencies {
+    compile project(":model")
+    compile project(":parser")
+    compile project(":export")
+}
