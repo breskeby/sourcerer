@@ -216,7 +216,7 @@ public class SourceMetaDataVisitor extends VisitorAdapter {
         }
     }
 
-    private void extractModifiers(GroovySourceAST t, AbstractLanguageElement metaData) {
+    private int extractModifiers(GroovySourceAST t, AbstractLanguageElement metaData) {
         final int modifiers = extractModifiers(t);
         metaData.setAbstract(Modifier.isAbstract(modifiers));
         if(groovy){
@@ -225,6 +225,7 @@ public class SourceMetaDataVisitor extends VisitorAdapter {
             metaData.setPublic(Modifier.isPublic(modifiers) ||
                     (metaData instanceof MethodMetaData && ((MethodMetaData) metaData).getOwnerClass().isInterface()));
         }
+        return modifiers;
     }
 
     private void extractParameters(GroovySourceAST t, MethodMetaData method) {
@@ -364,6 +365,9 @@ public class SourceMetaDataVisitor extends VisitorAdapter {
                     break;
                 case LITERAL_static:
                     modifierFlags |= Modifier.STATIC;
+                    break;
+                case ABSTRACT:
+                    modifierFlags |= Modifier.ABSTRACT;
                     break;
             }
         }

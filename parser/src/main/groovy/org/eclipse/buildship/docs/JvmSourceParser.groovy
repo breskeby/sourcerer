@@ -49,42 +49,6 @@ public class JvmSourceParser {
         return repository;
     }
 
-    Map<String, ClassMetaData> filterTasks(ClassMetaDataRepository<ClassMetaData> repository) {
-        Map<String, ClassMetaData> filteredRepository = new HashMap<String, ClassMetaData>()
-
-        repository.each { String name, ClassMetaData classMetadata ->
-            if (isTaskClass(repository, classMetadata)) {
-                if(!classMetadata.isInterface() && !classMetadata.isAbstract()){
-                    filteredRepository.put(classMetadata.getClassName(), classMetadata);
-                }
-            }
-
-        }
-        return filteredRepository;
-    }
-
-    private boolean isTaskClass(ClassMetaDataRepository repository, ClassMetaData classMetaData) {
-        if (classMetaData == null) {
-            return false
-        }
-        classMetaData.attach(repository);
-        ClassMetaData superClazz= repository.find(classMetaData.getSuperClassName())
-
-        if(superClazz){
-            if(isTaskClass(repository, superClazz)){
-                return true;
-            }
-        }
-
-        boolean implementsTask = classMetaData.getInterfaceNames().any { ifName ->
-            if (ifName.equals("org.gradle.api.Task")) {
-                return true
-            }
-            isTaskClass(repository, repository.find(ifName));
-        };
-
-        return implementsTask;
-    }
 
     void parse(File sourceFile, ClassMetaDataRepository<ClassMetaData> repository) {
         try {

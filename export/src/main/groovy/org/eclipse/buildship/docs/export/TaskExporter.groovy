@@ -30,6 +30,8 @@ public class TaskExporter {
 
     ClassMetaDataRepository metaDataRepository
 
+    File tempDir = new File("tempXml")
+
     public TaskExporter(ClassMetaDataRepository metaDataRepository ){
         this.metaDataRepository = metaDataRepository;
     }
@@ -52,7 +54,6 @@ public class TaskExporter {
     List<TaskType> convertToDto(Map<String, ClassMetaData> tasks) {
         List<TaskType> taskTypes = new ArrayList<TaskType>();
 
-        File tempDir = new File("tempXml")
         tempDir.mkdirs()
         for (ClassMetaData taskMetaData : tasks.values()) {
             println "{taskMetaData.getClassName()} = ${taskMetaData.getClassName()}"
@@ -60,28 +61,31 @@ public class TaskExporter {
             Document document = newEmptyDocument()
             DocComment comment = createDocBookComment(document, taskMetaData)
             String clazzcomment = generateHtmlFormatttedComment(taskMetaData.getClassName(), document, comment, tempDir)
-
             final TaskType taskType = new TaskType(taskMetaData.getClassName(), taskMetaData.getSimpleName(), clazzcomment);
-            final Set<PropertyMetaData> declaredProperties = taskMetaData.getDeclaredProperties();
-            for (PropertyMetaData declaredProperty : declaredProperties) {
-
-                if(declaredProperty.isWriteable()) {
-
-                    Document propDocument = newEmptyDocument()
-                    DocComment propComment = createDocBookComment(propDocument, declaredProperty)
-
-                    String formattedPropComment = generateHtmlFormatttedComment(taskMetaData.getClassName()+declaredProperty.getName(), propDocument, propComment, tempDir)
-
-                    taskType.addTaskProperty(new TaskProperty(declaredProperty.getName(), formattedPropComment, declaredProperty.getType().getName()));
-                }
-            }
+            collectProperties(taskType, taskMetaData);
             taskTypes.add(taskType);
         }
 
         return taskTypes;
     }
 
+    def collectProperties(TaskType taskType, ClassMetaData classMetaData) {
+        def currentMetaData = classMetaData
+        while(currentMetaData != null) {
+            for (PropertyMetaData declaredProperty : currentMetaData.getDeclaredProperties()) {
+                if(declaredProperty.isWriteable()) {
+                    Document propDocument = newEmptyDocument()
+                    DocComment propComment = createDocBookComment(propDocument, declaredProperty)
+                    String formattedPropComment = generateHtmlFormatttedComment(classMetaData.getClassName()+declaredProperty.getName(), propDocument, propComment, tempDir)
 
+                    TaskProperty taskProperty = new TaskProperty(declaredProperty.getName(), formattedPropComment, declaredProperty.getType().getName())
+                    taskType.addTaskProperty(taskProperty);
+                }
+            }
+            currentMetaData = currentMetaData.getSuperClass()
+        }
+
+    }
 
     private String generateHtmlFormatttedComment(String name, Document document, DocComment comment, File tempDir) {
 
@@ -144,13 +148,10 @@ public class TaskExporter {
     }
 
     public static Document newEmptyDocument() {
-        DocumentBuilderFactory factory = null;
         DocumentBuilder builder = null;
         Document ret;
-
         try {
-            factory = DocumentBuilderFactory.newInstance();
-            builder = factory.newDocumentBuilder();
+            builder =  DocumentBuilderFactory.newInstance().newDocumentBuilder();
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
